@@ -44,11 +44,11 @@ public class SimulationQueue {
 
   public double getGlobalTime() {
     return globalTime;
-}
+  }
 
-public double[] getCapacityTimes() {
+  public double[] getCapacityTimes() {
     return capacityTime;
-}
+  }
 
   public int getCurrentOccupancy() {
     return currentOccupancy;

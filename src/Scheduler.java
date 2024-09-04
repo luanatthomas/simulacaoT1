@@ -30,15 +30,18 @@ public class Scheduler {
   }
 
   public void printStateProbabilities() {
-    double totalTime = simulationQueue.getGlobalTime();
+    double totalTime = 0;
+    for (Double i : simulationQueue.getCapacityTimes()) {
+      totalTime += i;
+    }
     double[] stateTimes = simulationQueue.getCapacityTimes();
 
     System.out.println("State\tTime Accumulated\tProbability");
     for (int i = 0; i < stateTimes.length; i++) {
-        double probability = stateTimes[i] / totalTime;
-        System.out.printf("%d\t%.2f\t\t%.4f%n", i, stateTimes[i], probability);
+      double probability = stateTimes[i] / totalTime;
+      System.out.printf("%d\t%.2f\t\t%.4f%n", i, stateTimes[i], probability);
     }
-}
+  }
 
   private void createPseudoRandom() {
     double seed = 0; // Initial seed value
