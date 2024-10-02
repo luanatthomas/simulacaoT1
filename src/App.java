@@ -1,11 +1,17 @@
+import java.util.HashMap;
+import java.util.Map;
+
 public class App {
 
   public static void main(String[] args) {
-    SimulationQueue simulationQueue = new SimulationQueue(2, 5);
-    Scheduler.Interval arrivalInterval = new Scheduler.Interval(2, 5);
-    Scheduler.Interval departureInterval = new Scheduler.Interval(3, 5);
+    Interval arrivalInterval = new Interval(2, 5);
+    Interval departureInterval = new Interval(3, 5);
+    Map<String, Double> routing = new HashMap<String, Double>();
+    routing.put("-1", 1.);
+    SimulationQueue simulationQueue = new SimulationQueue("Q1", 1, 5, departureInterval, routing);
 
-    Scheduler scheduler = new Scheduler(simulationQueue, arrivalInterval, departureInterval);
-    scheduler.start(2);
+    Scheduler scheduler = new Scheduler(arrivalInterval);
+    scheduler.addQueue("Q1", simulationQueue);
+    scheduler.start(2, "Q1");
   }
 }

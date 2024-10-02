@@ -1,45 +1,30 @@
+import java.util.HashMap;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 public class Scheduler {
   private Interval arrivalInterval;
-  private Interval departureInterval;
   private PseudoRandom random;
-  private SimulationQueue simulationQueue;
+  private Map<String, SimulationQueue> queuesToSimulate;
+  // private SimulationQueue simulationQueue;
   private PriorityQueue<Event> eventQueue;
 
-  public Scheduler(SimulationQueue simulationQueue, Interval arrivalInterval, Interval departureInterval) {
-    this.simulationQueue = simulationQueue;
+  public Scheduler(Interval arrivalInterval) {
     this.arrivalInterval = arrivalInterval;
-    this.departureInterval = departureInterval;
     this.eventQueue = new PriorityQueue<>();
+    this.queuesToSimulate = new HashMap<>();
     createPseudoRandom();
   }
 
-  public void start(double initialArrivalTime) {
-    eventQueue.add(new Event(initialArrivalTime, EventType.ARRIVAL));
+  public void addQueue(String id, SimulationQueue simulationQueue) {
+    queuesToSimulate.put(id, simulationQueue);
+  }
+
+  public void start(double initialArrivalTime, String initialQueueId) {
+    eventQueue.add(new Event(initialArrivalTime, EventType.ARRIVAL, queuesToSimulate.get(initialQueueId)));
 
     for (int i = 0; i < 100000; i++) {
       executeNextEvent();
-    }
-
-    // Acumular o tempo do último estado após o último evento
-    simulationQueue.accumulateFinalStateTime();
-
-    // Após a simulação, calcular e imprimir as distribuições de probabilidade
-    printStateProbabilities();
-  }
-
-  public void printStateProbabilities() {
-    double totalTime = 0;
-    for (Double i : simulationQueue.getCapacityTimes()) {
-      totalTime += i;
-    }
-    double[] stateTimes = simulationQueue.getCapacityTimes();
-
-    System.out.println("State\tTime Accumulated\tProbability");
-    for (int i = 0; i < stateTimes.length; i++) {
-      double probability = stateTimes[i] / totalTime;
-      System.out.printf("%d\t%.2f\t\t%.4f%n", i, stateTimes[i], probability);
     }
   }
 
@@ -52,72 +37,84 @@ public class Scheduler {
     this.random = new PseudoRandom(seed, a, c, m);
   }
 
-  public void scheduleNextArrival(double currentTime) {
+  public void scheduleNextArrival(double currentTime, SimulationQueue simulationQueue) {
     double nextArrivalTime = currentTime + arrivalInterval.generateNormalInterval(random);
-    eventQueue.add(new Event(nextArrivalTime, EventType.ARRIVAL));
+    eventQueue.add(new Event(nextArrivalTime, EventType.ARRIVAL, simulationQueue));
   }
 
-  public void scheduleNextDeparture(double currentTime) {
-    double nextDepartureTime = currentTime + departureInterval.generateNormalInterval(random);
-    eventQueue.add(new Event(nextDepartureTime, EventType.DEPARTURE));
+  public void scheduleNextPassage(double currentTime, SimulationQueue simulationQueue) {
+    // Busca departure interval da simulationQueue (serviceInterval)
+
+    double nextDepartureTime = currentTime + simulationQueue.getServiceInterval().generateNormalInterval(random);
+    eventQueue.add(new Event(nextDepartureTime, EventType.PASSAGE, simulationQueue));
   }
 
   public void executeNextEvent() {
     if (!eventQueue.isEmpty()) {
-      Event nextEvent = eventQueue.poll();
-      double currentTime = nextEvent.getTime();
+      Event currentEvent = eventQueue.poll();
+      double currentTime = currentEvent.getTime();
+      SimulationQueue queue = currentEvent.getSimulationQueue();
 
-      if (nextEvent.getType() == EventType.ARRIVAL) {
+      if (currentEvent.getType() == EventType.ARRIVAL) {
         System.out.println("Handling arrival at time: " + currentTime);
 
-        simulationQueue.simulateArrival(currentTime);
+        queue.simulateArrival(currentTime);
 
-        if (simulationQueue.getCurrentOccupancy() <= simulationQueue.getNumServers()) {
-          scheduleNextDeparture(currentTime);
+        if (queue.getCurrentOccupancy() < queue.getNumServers()) {
+          queue.simulateArrival(currentTime);
+          if (queue.getCurrentOccupancy() <= queue.getNumServers()) {
+            scheduleNextPassage(currentTime, queue); // nextPassage
+          }
+        } else {
+          queue.incLoss();
         }
 
-        scheduleNextArrival(currentTime);
-      } else if (nextEvent.getType() == EventType.DEPARTURE) {
-        System.out.println("Handling departure at time: " + currentTime);
+        scheduleNextArrival(currentTime, queue);
 
-        simulationQueue.simulateDeparture(currentTime);
+        // } else if (currentEvent.getType() == EventType.DEPARTURE) {
+        // System.out.println("Handling departure at time: " + currentTime);
 
-        if (simulationQueue.getCurrentOccupancy() >= simulationQueue.getNumServers()) {
-          scheduleNextDeparture(currentTime);
+        // simulationQueue.simulateDeparture(currentTime);
+
+        // if (simulationQueue.getCurrentOccupancy() >= simulationQueue.getNumServers())
+        // {
+        // scheduleNextDeparture(currentTime);
+        // }
+      } else if (currentEvent.getType() == EventType.PASSAGE) {
+        System.out.println("Handling passage at time: " + currentTime);
+
+        String queueId = queue.getNextQueue(random.getNextRandom());
+        SimulationQueue nextQueue = queuesToSimulate.get(queueId);
+
+        queue.simulateDeparture(currentTime);
+
+        if (queue.getCurrentOccupancy() >= queue.getNumServers()) {
+          scheduleNextPassage(currentTime, queue); // nextPassage
+        }
+
+        if (nextQueue != null) {
+          if (nextQueue.getCurrentOccupancy() < nextQueue.getNumServers()) {
+            nextQueue.simulateArrival(currentTime);
+            if (nextQueue.getCurrentOccupancy() <= nextQueue.getNumServers()) {
+              scheduleNextPassage(currentTime, nextQueue);
+            }
+          } else {
+            nextQueue.incLoss();
+          }
         }
       }
-    }
-  }
-
-  public static class Interval {
-    private int lowerTime;
-    private int higherTime;
-
-    public Interval(int lowerTime, int higherTime) {
-      this.lowerTime = lowerTime;
-      this.higherTime = higherTime;
-    }
-
-    public int getLowerTime() {
-      return lowerTime;
-    }
-
-    public int getHigherTime() {
-      return higherTime;
-    }
-
-    public double generateNormalInterval(PseudoRandom random) {
-      return this.lowerTime + (this.higherTime - this.lowerTime) * random.getNextRandom();
     }
   }
 
   private class Event implements Comparable<Event> {
     private double time;
     private EventType type;
+    private SimulationQueue simulationQueue;
 
-    public Event(double time, EventType type) {
+    public Event(double time, EventType type, SimulationQueue simulationQueue) {
       this.time = time;
       this.type = type;
+      this.simulationQueue = simulationQueue;
     }
 
     public double getTime() {
@@ -128,6 +125,10 @@ public class Scheduler {
       return type;
     }
 
+    public SimulationQueue getSimulationQueue() {
+      return simulationQueue;
+    }
+
     @Override
     public int compareTo(Event other) {
       return Double.compare(this.time, other.time);
@@ -135,6 +136,7 @@ public class Scheduler {
   }
 
   private enum EventType {
-    ARRIVAL, DEPARTURE
+    ARRIVAL, DEPARTURE,
+    PASSAGE
   }
 }
