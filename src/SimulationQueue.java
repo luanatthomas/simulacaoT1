@@ -1,6 +1,6 @@
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SimulationQueue {
@@ -31,17 +31,29 @@ public class SimulationQueue {
     this.routing = routing;
   }
 
+  public SimulationQueue(String id, int numServers, int capacity, Interval serviceInterval) {
+    this.numServers = numServers;
+    this.capacity = capacity;
+    // this.globalTime = 0;
+    this.lastEventTime = 0;
+    this.capacityTime = new double[capacity + 1];
+    this.currentOccupancy = 0;
+
+    this.id = id;
+    this.accLoss = 0;
+    this.serviceInterval = serviceInterval;
+    this.routing = new HashMap<String, Double>();
+  }
+
+  public void addRouting(String id, Double prob) {
+    routing.put(id, prob);
+  }
+
   public void simulateArrival(double currTime) {
-    // Process an arrival event
-    // globalTime = currTime;
-    // if (currentOccupancy >= capacity) {
-    // System.out.println("Queue is full");
-    // accLoss++;
-    // return;
-    // }
-    System.out.println("currentOccupancy: " + currentOccupancy);
-    System.out.println(Arrays.toString(capacityTime));
+    // System.out.println("-> " + id + " currentOccupancy: " + currentOccupancy);
+    // System.out.println("-> " + id + " " + Arrays.toString(capacityTime) + "\n");
     capacityTime[currentOccupancy] += (currTime - lastEventTime);
+    lastEventTime = currTime;
     currentOccupancy++;
   }
 
@@ -49,11 +61,12 @@ public class SimulationQueue {
     // Process a departure event
     // globalTime = currTime;
     if (currentOccupancy <= 0) {
-      System.out.println("Queue is empty");
+      // System.out.println("-> " + id + " Queue is empty" + "\n");
       return;
     }
 
     capacityTime[currentOccupancy] += currTime - lastEventTime;
+    lastEventTime = currTime;
     currentOccupancy--;
   }
 
@@ -69,19 +82,41 @@ public class SimulationQueue {
     return serviceInterval;
   }
 
+  public String getId() {
+    return id;
+  }
+
   public String getNextQueue(double rand) {
-    Map<Double, String> possibleNext = new HashMap<Double, String>();
+    double sum = 0;
+    double selectedProb = 0;
 
-    for (String key : routing.keySet()) {
-
-      if (rand <= routing.get(key)) {
-        System.out.println("Next queue: " + key);
-        possibleNext.put(routing.get(key), key);
+    for (Double prob : routing.values()) {
+      sum += prob;
+      if (rand <= sum) {
+        selectedProb = prob;
+        break;
       }
     }
 
-    Double k = Collections.min(possibleNext.keySet());
-    return possibleNext.get(k);
+    for (Map.Entry<String, Double> entry : routing.entrySet()) {
+      if (entry.getValue() == selectedProb) {
+        return entry.getKey();
+      }
+    }
+
+    return null;
+  }
+
+  // public double[] getCapacityTimes() {
+  // return capacityTime;
+  // }
+
+  public List<Double> getCapacityTimes() {
+    return Arrays.asList(Arrays.stream(capacityTime).boxed().toArray(Double[]::new));
+  }
+
+  public int getCapacity() {
+    return capacity;
   }
 
   public int getAccLoss() {
@@ -90,12 +125,13 @@ public class SimulationQueue {
 
   public void incLoss() {
     accLoss++;
-    System.out.println("Fila " + id + " perdeu " + accLoss + " eventos");
+    // System.out.println("-> " + id + " Fila " + id + " perdeu " + accLoss + "
+    // eventos");
   }
 
   @Override
   public String toString() {
-    return "SimulationQueue [id=" + id + "]";
+    return "SimulationQueue [id=" + id + " ]";
   }
 
   // @Override
@@ -104,7 +140,7 @@ public class SimulationQueue {
   // + ", lastEventTime=" + lastEventTime
   // + ", capacityTime=" + Arrays.toString(capacityTime) + ", currentOccupancy=" +
   // currentOccupancy + ", accLoss="
-  // + accLoss + ", serviceInterval=" + serviceInterval + ", id=" + id + ",
+  // + accLoss + ", serviceInterval=" + serviceInterval + ", id=" + id + " ,
   // routing=" + routing + "]";
   // }
 

@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -23,9 +24,47 @@ public class Scheduler {
   public void start(double initialArrivalTime, String initialQueueId) {
     eventQueue.add(new Event(initialArrivalTime, EventType.ARRIVAL, queuesToSimulate.get(initialQueueId)));
 
-    for (int i = 0; i < 100000; i++) {
+    while (random.hasNext()) {
       executeNextEvent();
     }
+
+    // for (int i = 0; i < 100; i++) {
+    // // System.out.println("" + random.getNextRandom());
+
+    // executeNextEvent();
+    // }
+  }
+
+  public void printStateProbabilities() {
+    double globalTime = 0;
+    for (String queueId : queuesToSimulate.keySet()) {
+      SimulationQueue simulationQueue = queuesToSimulate.get(queueId);
+      System.out.println("--------------------" + queueId + "--------------------");
+
+      double totalTime = 0;
+
+      for (Double i : simulationQueue.getCapacityTimes()) {
+        totalTime += i;
+      }
+      globalTime += totalTime;
+      List<Double> stateTimes = simulationQueue.getCapacityTimes();
+
+      System.out.println("State\tTime Accumulated\tProbability");
+      for (int i = 0; i < stateTimes.size(); i++) {
+        if (stateTimes.get(i) == 0) {
+          continue;
+        }
+        double probability = stateTimes.get(i) / totalTime;
+        System.out.printf("%d\t%.2f\t\t%.4f%n", i, stateTimes.get(i), probability);
+      }
+
+      System.out.println("\nLosses: " + simulationQueue.getAccLoss() + "\n");
+
+      System.out.println("------------------------------------------");
+    }
+
+    System.out.println("\nGlobal Total Time: " + globalTime);
+    System.out.println("\nSimulation average time: " + globalTime / queuesToSimulate.size() + "\n");
   }
 
   private void createPseudoRandom() {
@@ -54,9 +93,10 @@ public class Scheduler {
       SimulationQueue queue = currentEvent.getSimulationQueue();
 
       if (currentEvent.getType() == EventType.ARRIVAL) {
-        System.out.println("Handling arrival at time: " + currentTime);
+        // System.out.println("--> " + queue.getId() + " Handling arrival at time: " +
+        // currentTime + "\n");
 
-        if (queue.getCurrentOccupancy() < queue.getNumServers()) {
+        if (queue.getCurrentOccupancy() < queue.getCapacity() || queue.getCapacity() == -1) {
           queue.simulateArrival(currentTime);
           if (queue.getCurrentOccupancy() <= queue.getNumServers()) {
             scheduleNextPassage(currentTime, queue);
@@ -67,7 +107,8 @@ public class Scheduler {
 
         scheduleNextArrival(currentTime, queue);
       } else if (currentEvent.getType() == EventType.PASSAGE) {
-        System.out.println("Handling passage at time: " + currentTime);
+        // System.out.println("--> " + queue.getId() + " Handling passage at time: " +
+        // currentTime + "\n");
 
         String queueId = queue.getNextQueue(random.getNextRandom());
         SimulationQueue nextQueue = queuesToSimulate.get(queueId);
@@ -79,7 +120,7 @@ public class Scheduler {
         }
 
         if (nextQueue != null) {
-          if (nextQueue.getCurrentOccupancy() < nextQueue.getNumServers()) {
+          if (nextQueue.getCurrentOccupancy() < nextQueue.getCapacity() || queue.getCapacity() == -1) {
             nextQueue.simulateArrival(currentTime);
             if (nextQueue.getCurrentOccupancy() <= nextQueue.getNumServers()) {
               scheduleNextPassage(currentTime, nextQueue);
