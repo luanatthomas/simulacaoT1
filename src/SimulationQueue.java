@@ -90,6 +90,22 @@ public class SimulationQueue {
 
   public void incLoss() {
     accLoss++;
+    System.out.println("Fila " + id + " perdeu " + accLoss + " eventos");
   }
+
+  @Override
+  public String toString() {
+    return "SimulationQueue [id=" + id + "]";
+  }
+
+  // @Override
+  // public String toString() {
+  // return "SimulationQueue [numServers=" + numServers + ", capacity=" + capacity
+  // + ", lastEventTime=" + lastEventTime
+  // + ", capacityTime=" + Arrays.toString(capacityTime) + ", currentOccupancy=" +
+  // currentOccupancy + ", accLoss="
+  // + accLoss + ", serviceInterval=" + serviceInterval + ", id=" + id + ",
+  // routing=" + routing + "]";
+  // }
 
 }

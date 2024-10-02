@@ -43,8 +43,6 @@ public class Scheduler {
   }
 
   public void scheduleNextPassage(double currentTime, SimulationQueue simulationQueue) {
-    // Busca departure interval da simulationQueue (serviceInterval)
-
     double nextDepartureTime = currentTime + simulationQueue.getServiceInterval().generateNormalInterval(random);
     eventQueue.add(new Event(nextDepartureTime, EventType.PASSAGE, simulationQueue));
   }
@@ -58,28 +56,16 @@ public class Scheduler {
       if (currentEvent.getType() == EventType.ARRIVAL) {
         System.out.println("Handling arrival at time: " + currentTime);
 
-        queue.simulateArrival(currentTime);
-
         if (queue.getCurrentOccupancy() < queue.getNumServers()) {
           queue.simulateArrival(currentTime);
           if (queue.getCurrentOccupancy() <= queue.getNumServers()) {
-            scheduleNextPassage(currentTime, queue); // nextPassage
+            scheduleNextPassage(currentTime, queue);
           }
         } else {
           queue.incLoss();
         }
 
         scheduleNextArrival(currentTime, queue);
-
-        // } else if (currentEvent.getType() == EventType.DEPARTURE) {
-        // System.out.println("Handling departure at time: " + currentTime);
-
-        // simulationQueue.simulateDeparture(currentTime);
-
-        // if (simulationQueue.getCurrentOccupancy() >= simulationQueue.getNumServers())
-        // {
-        // scheduleNextDeparture(currentTime);
-        // }
       } else if (currentEvent.getType() == EventType.PASSAGE) {
         System.out.println("Handling passage at time: " + currentTime);
 
@@ -133,6 +119,12 @@ public class Scheduler {
     public int compareTo(Event other) {
       return Double.compare(this.time, other.time);
     }
+
+    @Override
+    public String toString() {
+      return "Event [time=" + time + ", type=" + type + ", simulationQueue=" + simulationQueue + "]";
+    }
+
   }
 
   private enum EventType {
