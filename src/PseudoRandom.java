@@ -119,15 +119,15 @@ public class PseudoRandom {
     currentIndex = 0;
   }
 
-  public double getNextRandom() {
-    // Double res = randomNumbers.get(currentIndex);
-    // currentIndex++;
-    // return res;
-    seed = (a * seed + c) % m;
-    return (double) seed / m;
+  public double getNextRandom() throws IndexOutOfBoundsException {
+    Double res = randomNumbers.get(currentIndex);
+    currentIndex++;
+    return res;
+    // seed = (a * seed + c) % m;
+    // return (double) seed / m;
   }
 
-  public double getFixNextRandom() {
+  public double getFixNextRandom() throws IndexOutOfBoundsException {
     Double res = randomNumbers.get(currentIndex);
     currentIndex++;
     return res;

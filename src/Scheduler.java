@@ -25,7 +25,11 @@ public class Scheduler {
     eventQueue.add(new Event(initialArrivalTime, EventType.ARRIVAL, queuesToSimulate.get(initialQueueId)));
 
     while (random.hasNext()) {
-      executeNextEvent();
+      try {
+        executeNextEvent();
+      } catch (IndexOutOfBoundsException e) {
+        System.out.println("Fim da simulação");
+      }
     }
 
     // for (int i = 0; i < 100; i++) {
@@ -107,8 +111,8 @@ public class Scheduler {
 
         scheduleNextArrival(currentTime, queue);
       } else if (currentEvent.getType() == EventType.PASSAGE) {
-        // System.out.println("--> " + queue.getId() + " Handling passage at time: " +
-        // currentTime + "\n");
+        System.out.println("--> " + queue.getId() + " Handling passage at time: " +
+            currentTime + "\n");
 
         String queueId = queue.getNextQueue(random.getNextRandom());
         SimulationQueue nextQueue = queuesToSimulate.get(queueId);
