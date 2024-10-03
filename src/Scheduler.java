@@ -7,14 +7,13 @@ public class Scheduler {
   private Interval arrivalInterval;
   private PseudoRandom random;
   private Map<String, SimulationQueue> queuesToSimulate;
-  // private SimulationQueue simulationQueue;
   private PriorityQueue<Event> eventQueue;
 
-  public Scheduler(Interval arrivalInterval) {
+  public Scheduler(Interval arrivalInterval, int quantRandomNumbers) {
     this.arrivalInterval = arrivalInterval;
     this.eventQueue = new PriorityQueue<>();
     this.queuesToSimulate = new HashMap<>();
-    createPseudoRandom();
+    createPseudoRandom(quantRandomNumbers);
   }
 
   public void addQueue(String id, SimulationQueue simulationQueue) {
@@ -71,13 +70,13 @@ public class Scheduler {
     System.out.println("\nSimulation average time: " + globalTime / queuesToSimulate.size() + "\n");
   }
 
-  private void createPseudoRandom() {
+  private void createPseudoRandom(int quantRandomNumbers) {
     double seed = 0; // Initial seed value
     double a = 1664525; // Multiplier
     double c = 1013904223; // Increment
     double m = Math.pow(2, 32);
 
-    this.random = new PseudoRandom(seed, a, c, m);
+    this.random = new PseudoRandom(seed, a, c, m, quantRandomNumbers);
   }
 
   public void scheduleNextArrival(double currentTime, SimulationQueue simulationQueue) {

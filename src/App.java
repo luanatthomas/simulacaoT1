@@ -29,7 +29,7 @@ public class App {
         String name = entry.getKey();
         Map<String, Object> values = entry.getValue();
         Interval interval = intervals.get(values.get("interval"));
-		Integer capacity = toDouble(values.get("capacity") == null ? -1 : values.get("capacity")).intValue();
+        Integer capacity = toDouble(values.get("capacity") == null ? -1 : values.get("capacity")).intValue();
         SimulationQueue queue = new SimulationQueue(name, toDouble(values.get("servers")).intValue(),
             capacity, interval);
         queues.put(name, queue);
@@ -51,10 +51,11 @@ public class App {
 
       // Create scheduler
       Interval arrivalInterval = intervals.get(data.get("arrivalInterval"));
+      int quantRandomNumbers = (int) data.get("quantRandomNumbers");
 
       Double startTime = toDouble(data.get("startTime"));
       String startQueue = (String) data.get("startQueue");
-      Scheduler scheduler = new Scheduler(arrivalInterval);
+      Scheduler scheduler = new Scheduler(arrivalInterval, quantRandomNumbers);
 
       // Add queues to scheduler
       for (Map.Entry<String, SimulationQueue> entry : queues.entrySet()) {

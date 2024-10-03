@@ -15,7 +15,7 @@ intervals:
 queues:
   Q1:
     servers: 1
-    capacity: 
+    capacity:
     interval: intervalQ1
   Q2:
     servers: 2
@@ -41,3 +41,4 @@ routing:
 arrivalInterval: arrivalInterval
 startTime: 2
 startQueue: Q1
+quantRandomNumbers: 100000

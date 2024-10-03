@@ -16,6 +16,6 @@ public class Interval {
   }
 
   public double generateNormalInterval(PseudoRandom random) {
-    return this.lowerTime + (this.higherTime - this.lowerTime) * random.getFixNextRandom();
+    return this.lowerTime + (this.higherTime - this.lowerTime) * random.getNextRandom();
   }
 }
