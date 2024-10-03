@@ -15,7 +15,7 @@ intervals:
 queues:
   Q1:
     servers: 1
-    capacity: 10000.
+    capacity: 
     interval: intervalQ1
   Q2:
     servers: 2

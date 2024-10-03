@@ -29,8 +29,9 @@ public class App {
         String name = entry.getKey();
         Map<String, Object> values = entry.getValue();
         Interval interval = intervals.get(values.get("interval"));
+		Integer capacity = toDouble(values.get("capacity") == null ? -1 : values.get("capacity")).intValue();
         SimulationQueue queue = new SimulationQueue(name, toDouble(values.get("servers")).intValue(),
-            toDouble(values.get("capacity")).intValue(), interval);
+            capacity, interval);
         queues.put(name, queue);
       }
 

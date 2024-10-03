@@ -4,144 +4,151 @@ import java.util.List;
 import java.util.Map;
 
 public class SimulationQueue {
-  private int numServers;
-  private int capacity;
-  // private double globalTime;
-  private double lastEventTime;
-  private double[] capacityTime;
-  private int currentOccupancy;
+	private int numServers;
+	private int capacity;
+	// private double globalTime;
+	private double lastEventTime;
+	private double[] capacityTime;
+	private int currentOccupancy;
 
-  private int accLoss;
-  private Interval serviceInterval;
-  private String id;
-  private Map<String, Double> routing; // <FilaDestino, Probabilidade>
+	private int accLoss;
+	private Interval serviceInterval;
+	private String id;
+	private Map<String, Double> routing; // <FilaDestino, Probabilidade>
 
-  public SimulationQueue(String id, int numServers, int capacity, Interval serviceInterval,
-      Map<String, Double> routing) {
-    this.numServers = numServers;
-    this.capacity = capacity;
-    // this.globalTime = 0;
-    this.lastEventTime = 0;
-    this.capacityTime = new double[capacity + 1];
-    this.currentOccupancy = 0;
+	public SimulationQueue(String id, int numServers, int capacity, Interval serviceInterval, Map<String, Double> routing) {
+		if (capacity == -1) {
+			capacity = 1_000_000;
+		}
 
-    this.id = id;
-    this.accLoss = 0;
-    this.serviceInterval = serviceInterval;
-    this.routing = routing;
-  }
+		this.numServers = numServers;
+		this.capacity = capacity;
+		// this.globalTime = 0;
+		this.lastEventTime = 0;
+		this.capacityTime = new double[capacity + 1];
+		this.currentOccupancy = 0;
 
-  public SimulationQueue(String id, int numServers, int capacity, Interval serviceInterval) {
-    this.numServers = numServers;
-    this.capacity = capacity;
-    // this.globalTime = 0;
-    this.lastEventTime = 0;
-    this.capacityTime = new double[capacity + 1];
-    this.currentOccupancy = 0;
+		this.id = id;
+		this.accLoss = 0;
+		this.serviceInterval = serviceInterval;
+		this.routing = routing;
+	}
 
-    this.id = id;
-    this.accLoss = 0;
-    this.serviceInterval = serviceInterval;
-    this.routing = new HashMap<String, Double>();
-  }
+	public SimulationQueue(String id, int numServers, int capacity, Interval serviceInterval) {
+		if (capacity == -1) {
+			capacity = 1_000_000;
+		}
 
-  public void addRouting(String id, Double prob) {
-    routing.put(id, prob);
-  }
+		this.numServers = numServers;
+		this.capacity = capacity;
+		// this.globalTime = 0;
+		this.lastEventTime = 0;
+		this.capacityTime = new double[capacity + 1];
+		this.currentOccupancy = 0;
 
-  public void simulateArrival(double currTime) {
-    // System.out.println("-> " + id + " currentOccupancy: " + currentOccupancy);
-    // System.out.println("-> " + id + " " + Arrays.toString(capacityTime) + "\n");
-    capacityTime[currentOccupancy] += (currTime - lastEventTime);
-    lastEventTime = currTime;
-    currentOccupancy++;
-  }
+		this.id = id;
+		this.accLoss = 0;
+		this.serviceInterval = serviceInterval;
+		this.routing = new HashMap<String, Double>();
+	}
 
-  public void simulateDeparture(double currTime) {
-    // Process a departure event
-    // globalTime = currTime;
-    if (currentOccupancy <= 0) {
-      // System.out.println("-> " + id + " Queue is empty" + "\n");
-      return;
-    }
+	public void addRouting(String id, Double prob) {
+		routing.put(id, prob);
+	}
 
-    capacityTime[currentOccupancy] += currTime - lastEventTime;
-    lastEventTime = currTime;
-    currentOccupancy--;
-  }
+	public void simulateArrival(double currTime) {
+		// System.out.println("-> " + id + " currentOccupancy: " + currentOccupancy);
+		// System.out.println("-> " + id + " " + Arrays.toString(capacityTime) + "\n");
+		capacityTime[currentOccupancy] += (currTime - lastEventTime);
+		lastEventTime = currTime;
+		currentOccupancy++;
+	}
 
-  public int getCurrentOccupancy() {
-    return currentOccupancy;
-  }
+	public void simulateDeparture(double currTime) {
+		// Process a departure event
+		// globalTime = currTime;
+		if (currentOccupancy <= 0) {
+			// System.out.println("-> " + id + " Queue is empty" + "\n");
+			return;
+		}
 
-  public int getNumServers() {
-    return numServers;
-  }
+		capacityTime[currentOccupancy] += currTime - lastEventTime;
+		lastEventTime = currTime;
+		currentOccupancy--;
+	}
 
-  public Interval getServiceInterval() {
-    return serviceInterval;
-  }
+	public int getCurrentOccupancy() {
+		return currentOccupancy;
+	}
 
-  public String getId() {
-    return id;
-  }
+	public int getNumServers() {
+		return numServers;
+	}
 
-  public String getNextQueue(double rand) {
-    double sum = 0;
-    double selectedProb = 0;
+	public Interval getServiceInterval() {
+		return serviceInterval;
+	}
 
-    for (Double prob : routing.values()) {
-      sum += prob;
-      if (rand <= sum) {
-        selectedProb = prob;
-        break;
-      }
-    }
+	public String getId() {
+		return id;
+	}
 
-    for (Map.Entry<String, Double> entry : routing.entrySet()) {
-      if (entry.getValue() == selectedProb) {
-        return entry.getKey();
-      }
-    }
+	public String getNextQueue(double rand) {
+		double sum = 0;
+		double selectedProb = 0;
 
-    return null;
-  }
+		for (Double prob : routing.values()) {
+			sum += prob;
+			if (rand <= sum) {
+				selectedProb = prob;
+				break;
+			}
+		}
 
-  // public double[] getCapacityTimes() {
-  // return capacityTime;
-  // }
+		for (Map.Entry<String, Double> entry : routing.entrySet()) {
+			if (entry.getValue() == selectedProb) {
+				return entry.getKey();
+			}
+		}
 
-  public List<Double> getCapacityTimes() {
-    return Arrays.asList(Arrays.stream(capacityTime).boxed().toArray(Double[]::new));
-  }
+		return null;
+	}
 
-  public int getCapacity() {
-    return capacity;
-  }
+	// public double[] getCapacityTimes() {
+	// return capacityTime;
+	// }
 
-  public int getAccLoss() {
-    return accLoss;
-  }
+	public List<Double> getCapacityTimes() {
+		return Arrays.asList(Arrays.stream(capacityTime).boxed().toArray(Double[]::new));
+	}
 
-  public void incLoss() {
-    accLoss++;
-    // System.out.println("-> " + id + " Fila " + id + " perdeu " + accLoss + "
-    // eventos");
-  }
+	public int getCapacity() {
+		return capacity;
+	}
 
-  @Override
-  public String toString() {
-    return "SimulationQueue [id=" + id + " ]";
-  }
+	public int getAccLoss() {
+		return accLoss;
+	}
 
-  // @Override
-  // public String toString() {
-  // return "SimulationQueue [numServers=" + numServers + ", capacity=" + capacity
-  // + ", lastEventTime=" + lastEventTime
-  // + ", capacityTime=" + Arrays.toString(capacityTime) + ", currentOccupancy=" +
-  // currentOccupancy + ", accLoss="
-  // + accLoss + ", serviceInterval=" + serviceInterval + ", id=" + id + " ,
-  // routing=" + routing + "]";
-  // }
+	public void incLoss() {
+		accLoss++;
+		// System.out.println("-> " + id + " Fila " + id + " perdeu " + accLoss + "
+		// eventos");
+	}
+
+	@Override
+	public String toString() {
+		return "SimulationQueue [id=" + id + " ]";
+	}
+
+	// @Override
+	// public String toString() {
+	// return "SimulationQueue [numServers=" + numServers + ", capacity=" + capacity
+	// + ", lastEventTime=" + lastEventTime
+	// + ", capacityTime=" + Arrays.toString(capacityTime) + ", currentOccupancy=" +
+	// currentOccupancy + ", accLoss="
+	// + accLoss + ", serviceInterval=" + serviceInterval + ", id=" + id + " ,
+	// routing=" + routing + "]";
+	// }
 
 }
