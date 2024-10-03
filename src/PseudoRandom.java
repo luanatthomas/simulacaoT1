@@ -120,11 +120,11 @@ public class PseudoRandom {
   }
 
   public double getNextRandom() throws IndexOutOfBoundsException {
-    Double res = randomNumbers.get(currentIndex);
-    currentIndex++;
-    return res;
-    // seed = (a * seed + c) % m;
-    // return (double) seed / m;
+    // Double res = randomNumbers.get(currentIndex);
+    // currentIndex++;
+    // return res;
+    seed = (a * seed + c) % m;
+    return (double) seed / m;
   }
 
   public double getFixNextRandom() throws IndexOutOfBoundsException {

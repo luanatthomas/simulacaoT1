@@ -97,8 +97,8 @@ public class Scheduler {
       SimulationQueue queue = currentEvent.getSimulationQueue();
 
       if (currentEvent.getType() == EventType.ARRIVAL) {
-        // System.out.println("--> " + queue.getId() + " Handling arrival at time: " +
-        // currentTime + "\n");
+        System.out.println("--> " + queue.getId() + " Handling arrival at time: " +
+            currentTime + "\n");
 
         if (queue.getCurrentOccupancy() < queue.getCapacity() || queue.getCapacity() == -1) {
           queue.simulateArrival(currentTime);
@@ -119,12 +119,13 @@ public class Scheduler {
 
         queue.simulateDeparture(currentTime);
 
+        // if (queue.getCurrentOccupancy() >= queue.getNumServers()) {
         if (queue.getCurrentOccupancy() >= queue.getNumServers()) {
-          scheduleNextPassage(currentTime, queue); // nextPassage
+          scheduleNextPassage(currentTime, queue);
         }
 
         if (nextQueue != null) {
-          if (nextQueue.getCurrentOccupancy() < nextQueue.getCapacity() || queue.getCapacity() == -1) {
+          if (nextQueue.getCurrentOccupancy() < nextQueue.getCapacity() || nextQueue.getCapacity() == -1) {
             nextQueue.simulateArrival(currentTime);
             if (nextQueue.getCurrentOccupancy() <= nextQueue.getNumServers()) {
               scheduleNextPassage(currentTime, nextQueue);
