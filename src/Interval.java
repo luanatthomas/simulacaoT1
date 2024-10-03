@@ -1,17 +1,17 @@
 public class Interval {
-  private int lowerTime;
-  private int higherTime;
+  private Double lowerTime;
+  private Double higherTime;
 
-  public Interval(int lowerTime, int higherTime) {
+  public Interval(Double lowerTime, Double higherTime) {
     this.lowerTime = lowerTime;
     this.higherTime = higherTime;
   }
 
-  public int getLowerTime() {
+  public Double getLowerTime() {
     return lowerTime;
   }
 
-  public int getHigherTime() {
+  public Double getHigherTime() {
     return higherTime;
   }
 

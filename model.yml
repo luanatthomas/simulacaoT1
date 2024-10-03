@@ -1,0 +1,43 @@
+intervals:
+  arrivalInterval:
+    start: 2.0
+    end: 4.
+  intervalQ1:
+    start: 1
+    end: 2
+  intervalQ2:
+    start: 4
+    end: 8
+  intervalQ3:
+    start: 5
+    end: 15
+
+queues:
+  Q1:
+    servers: 1
+    capacity: 10000.
+    interval: intervalQ1
+  Q2:
+    servers: 2
+    capacity: 5
+    interval: intervalQ2
+  Q3:
+    servers: 2
+    capacity: 10
+    interval: intervalQ3
+
+routing:
+  Q1:
+    Q2: 0.8
+    Q3: 0.2
+  Q2:
+    Q1: 0.3
+    Q3: 0.5
+    Q-1: 0.2
+  Q3:
+    Q2: 0.7
+    Q-1: 0.3
+
+arrivalInterval: arrivalInterval
+startTime: 2
+startQueue: Q1

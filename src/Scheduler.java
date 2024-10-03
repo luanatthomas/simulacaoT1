@@ -21,7 +21,7 @@ public class Scheduler {
     queuesToSimulate.put(id, simulationQueue);
   }
 
-  public void start(double initialArrivalTime, String initialQueueId) {
+  public void start(Double initialArrivalTime, String initialQueueId) {
     eventQueue.add(new Event(initialArrivalTime, EventType.ARRIVAL, queuesToSimulate.get(initialQueueId)));
 
     while (random.hasNext()) {
