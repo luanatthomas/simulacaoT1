@@ -30,12 +30,6 @@ public class Scheduler {
         System.out.println("Fim da simulação");
       }
     }
-
-    // for (int i = 0; i < 100; i++) {
-    // // System.out.println("" + random.getNextRandom());
-
-    // executeNextEvent();
-    // }
   }
 
   public void printStateProbabilities() {
@@ -71,9 +65,9 @@ public class Scheduler {
   }
 
   private void createPseudoRandom(int quantRandomNumbers) {
-    double seed = 0; // Initial seed value
-    double a = 1664525; // Multiplier
-    double c = 1013904223; // Increment
+    double seed = 0; // Valor inicial
+    double a = 1664525; // Multiplicador
+    double c = 1013904223; // Incremento
     double m = Math.pow(2, 32);
 
     this.random = new PseudoRandom(seed, a, c, m, quantRandomNumbers);
@@ -118,7 +112,6 @@ public class Scheduler {
 
         queue.simulateDeparture(currentTime);
 
-        // if (queue.getCurrentOccupancy() >= queue.getNumServers()) {
         if (queue.getCurrentOccupancy() >= queue.getNumServers()) {
           scheduleNextPassage(currentTime, queue);
         }

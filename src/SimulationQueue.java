@@ -6,7 +6,6 @@ import java.util.Map;
 public class SimulationQueue {
 	private int numServers;
 	private int capacity;
-	// private double globalTime;
 	private double lastEventTime;
 	private double[] capacityTime;
 	private int currentOccupancy;
@@ -16,14 +15,14 @@ public class SimulationQueue {
 	private String id;
 	private Map<String, Double> routing; // <FilaDestino, Probabilidade>
 
-	public SimulationQueue(String id, int numServers, int capacity, Interval serviceInterval, Map<String, Double> routing) {
+	public SimulationQueue(String id, int numServers, int capacity, Interval serviceInterval,
+			Map<String, Double> routing) {
 		if (capacity == -1) {
 			capacity = 1_000_000;
 		}
 
 		this.numServers = numServers;
 		this.capacity = capacity;
-		// this.globalTime = 0;
 		this.lastEventTime = 0;
 		this.capacityTime = new double[capacity + 1];
 		this.currentOccupancy = 0;
@@ -41,11 +40,9 @@ public class SimulationQueue {
 
 		this.numServers = numServers;
 		this.capacity = capacity;
-		// this.globalTime = 0;
 		this.lastEventTime = 0;
 		this.capacityTime = new double[capacity + 1];
 		this.currentOccupancy = 0;
-
 		this.id = id;
 		this.accLoss = 0;
 		this.serviceInterval = serviceInterval;
@@ -114,10 +111,6 @@ public class SimulationQueue {
 		return null;
 	}
 
-	// public double[] getCapacityTimes() {
-	// return capacityTime;
-	// }
-
 	public List<Double> getCapacityTimes() {
 		return Arrays.asList(Arrays.stream(capacityTime).boxed().toArray(Double[]::new));
 	}
@@ -140,15 +133,4 @@ public class SimulationQueue {
 	public String toString() {
 		return "SimulationQueue [id=" + id + " ]";
 	}
-
-	// @Override
-	// public String toString() {
-	// return "SimulationQueue [numServers=" + numServers + ", capacity=" + capacity
-	// + ", lastEventTime=" + lastEventTime
-	// + ", capacityTime=" + Arrays.toString(capacityTime) + ", currentOccupancy=" +
-	// currentOccupancy + ", accLoss="
-	// + accLoss + ", serviceInterval=" + serviceInterval + ", id=" + id + " ,
-	// routing=" + routing + "]";
-	// }
-
 }
