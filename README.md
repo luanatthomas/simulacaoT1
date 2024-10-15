@@ -79,5 +79,7 @@ startQueue: Q1
    Executar a classe `App` com o caminho do arquivo `.yml`:
 
    ```bash
-   java -cp "bin:lib/*" App ./model.yml
+   (windows) java -cp "bin;lib/*" App ./model.yml
+    ou
+   (linux) java -cp "bin:lib/*" App ./model.yml
    ```
